@@ -422,3 +422,6 @@ verify_jwt = false
 
 [functions.scheduled-reminders]
 verify_jwt = false
+
+[functions.community-notification-worker]
+verify_jwt = false

@@ -569,63 +569,90 @@ export type Database = {
           amazon_url: string | null
           audiobook_url: string | null
           author_id: string
+          content_rating: string | null
           cover_url: string | null
           created_at: string
+          depth_mm: number | null
           ebook_url: string | null
+          edition_number: number | null
           embedding: string | null
+          format: string | null
+          height_mm: number | null
           id: string
           isbn13: string | null
           language: string | null
+          publication_date: string | null
           publication_year: number | null
+          publisher: string | null
           slug: string
           synopsis: string | null
           tags: string[] | null
           title: string
           total_chapters: number | null
           total_pages: number | null
+          translator: string | null
           updated_at: string
+          width_mm: number | null
         }
         Insert: {
           amazon_affiliate?: string | null
           amazon_url?: string | null
           audiobook_url?: string | null
           author_id: string
+          content_rating?: string | null
           cover_url?: string | null
           created_at?: string
+          depth_mm?: number | null
           ebook_url?: string | null
+          edition_number?: number | null
           embedding?: string | null
+          format?: string | null
+          height_mm?: number | null
           id?: string
           isbn13?: string | null
           language?: string | null
+          publication_date?: string | null
           publication_year?: number | null
+          publisher?: string | null
           slug: string
           synopsis?: string | null
           tags?: string[] | null
           title: string
           total_chapters?: number | null
           total_pages?: number | null
+          translator?: string | null
           updated_at?: string
+          width_mm?: number | null
         }
         Update: {
           amazon_affiliate?: string | null
           amazon_url?: string | null
           audiobook_url?: string | null
           author_id?: string
+          content_rating?: string | null
           cover_url?: string | null
           created_at?: string
+          depth_mm?: number | null
           ebook_url?: string | null
+          edition_number?: number | null
           embedding?: string | null
+          format?: string | null
+          height_mm?: number | null
           id?: string
           isbn13?: string | null
           language?: string | null
+          publication_date?: string | null
           publication_year?: number | null
+          publisher?: string | null
           slug?: string
           synopsis?: string | null
           tags?: string[] | null
           title?: string
           total_chapters?: number | null
           total_pages?: number | null
+          translator?: string | null
           updated_at?: string
+          width_mm?: number | null
         }
         Relationships: [
           {
@@ -1299,6 +1326,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_draft: boolean
           number: number
           published_at: string | null
           reading_range: string | null
@@ -1311,6 +1339,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_draft?: boolean
           number: number
           published_at?: string | null
           reading_range?: string | null
@@ -1323,6 +1352,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_draft?: boolean
           number?: number
           published_at?: string | null
           reading_range?: string | null
@@ -2056,11 +2086,50 @@ export type Database = {
           },
         ]
       }
+      meeting_attendance: {
+        Row: {
+          confirmed_at: string
+          meeting_id: string
+          proof_type: string | null
+          user_id: string
+        }
+        Insert: {
+          confirmed_at?: string
+          meeting_id: string
+          proof_type?: string | null
+          user_id: string
+        }
+        Update: {
+          confirmed_at?: string
+          meeting_id?: string
+          proof_type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_attendance_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_attendance_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meetings: {
         Row: {
           agenda: string | null
-          chapter_id: string
+          book_id: string
+          chapter_id: string | null
+          club_id: string | null
           created_at: string
+          created_by: string | null
           duration_min: number | null
           id: string
           kind: Database["public"]["Enums"]["meeting_kind"]
@@ -2068,13 +2137,19 @@ export type Database = {
           meeting_url: string | null
           scheduled_at: string
           slides_url: string | null
+          spoiler_policy: string
           status: Database["public"]["Enums"]["meeting_status"]
           title: string
+          updated_at: string
+          version: number
         }
         Insert: {
           agenda?: string | null
-          chapter_id: string
+          book_id: string
+          chapter_id?: string | null
+          club_id?: string | null
           created_at?: string
+          created_by?: string | null
           duration_min?: number | null
           id?: string
           kind?: Database["public"]["Enums"]["meeting_kind"]
@@ -2082,13 +2157,19 @@ export type Database = {
           meeting_url?: string | null
           scheduled_at: string
           slides_url?: string | null
+          spoiler_policy?: string
           status?: Database["public"]["Enums"]["meeting_status"]
           title: string
+          updated_at?: string
+          version?: number
         }
         Update: {
           agenda?: string | null
-          chapter_id?: string
+          book_id?: string
+          chapter_id?: string | null
+          club_id?: string | null
           created_at?: string
+          created_by?: string | null
           duration_min?: number | null
           id?: string
           kind?: Database["public"]["Enums"]["meeting_kind"]
@@ -2096,10 +2177,20 @@ export type Database = {
           meeting_url?: string | null
           scheduled_at?: string
           slides_url?: string | null
+          spoiler_policy?: string
           status?: Database["public"]["Enums"]["meeting_status"]
           title?: string
+          updated_at?: string
+          version?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "meetings_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "meetings_chapter_id_fkey"
             columns: ["chapter_id"]
@@ -2113,6 +2204,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_chapter_audience"
             referencedColumns: ["chapter_id"]
+          },
+          {
+            foreignKeyName: "meetings_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "user_clubs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meetings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2483,6 +2588,7 @@ export type Database = {
       notifications: {
         Row: {
           created_at: string
+          dedupe_key: string | null
           id: string
           kind: Database["public"]["Enums"]["notification_kind"]
           payload: Json
@@ -2491,6 +2597,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          dedupe_key?: string | null
           id?: string
           kind: Database["public"]["Enums"]["notification_kind"]
           payload?: Json
@@ -2499,6 +2606,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          dedupe_key?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["notification_kind"]
           payload?: Json
@@ -3012,6 +3120,7 @@ export type Database = {
       }
       reading_journal_entries: {
         Row: {
+          archived_at: string | null
           body: string
           book_id: string
           chapter_id: string | null
@@ -3027,12 +3136,15 @@ export type Database = {
           page_to: number | null
           percent_at: number | null
           season_id: string | null
+          shared_club_id: string | null
           title: string | null
           updated_at: string
           user_id: string
+          version: number
           visibility: Database["public"]["Enums"]["journal_visibility"]
         }
         Insert: {
+          archived_at?: string | null
           body: string
           book_id: string
           chapter_id?: string | null
@@ -3048,12 +3160,15 @@ export type Database = {
           page_to?: number | null
           percent_at?: number | null
           season_id?: string | null
+          shared_club_id?: string | null
           title?: string | null
           updated_at?: string
           user_id: string
+          version?: number
           visibility?: Database["public"]["Enums"]["journal_visibility"]
         }
         Update: {
+          archived_at?: string | null
           body?: string
           book_id?: string
           chapter_id?: string | null
@@ -3069,9 +3184,11 @@ export type Database = {
           page_to?: number | null
           percent_at?: number | null
           season_id?: string | null
+          shared_club_id?: string | null
           title?: string | null
           updated_at?: string
           user_id?: string
+          version?: number
           visibility?: Database["public"]["Enums"]["journal_visibility"]
         }
         Relationships: [
@@ -3102,6 +3219,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "seasons"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_journal_entries_shared_club_id_fkey"
+            columns: ["shared_club_id"]
+            isOneToOne: false
+            referencedRelation: "user_clubs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_journal_entries_shared_club_id_fkey"
+            columns: ["shared_club_id"]
+            isOneToOne: false
+            referencedRelation: "v_club_progress_panel"
+            referencedColumns: ["club_id"]
           },
           {
             foreignKeyName: "reading_journal_entries_user_id_fkey"
@@ -3329,6 +3460,7 @@ export type Database = {
           theme: string | null
           title: string
           updated_at: string
+          version: number
           visibility: Database["public"]["Enums"]["reading_list_visibility"]
         }
         Insert: {
@@ -3344,6 +3476,7 @@ export type Database = {
           theme?: string | null
           title: string
           updated_at?: string
+          version?: number
           visibility?: Database["public"]["Enums"]["reading_list_visibility"]
         }
         Update: {
@@ -3359,6 +3492,7 @@ export type Database = {
           theme?: string | null
           title?: string
           updated_at?: string
+          version?: number
           visibility?: Database["public"]["Enums"]["reading_list_visibility"]
         }
         Relationships: [
@@ -3593,6 +3727,96 @@ export type Database = {
           },
         ]
       }
+      user_club_invitations: {
+        Row: {
+          accepted_at: string | null
+          club_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          invited_by: string
+          invited_user_id: string
+          revoked_at: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          club_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          invited_by: string
+          invited_user_id: string
+          revoked_at?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          club_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          invited_user_id?: string
+          revoked_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_club_invitations_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "user_clubs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_club_invitations_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "v_club_progress_panel"
+            referencedColumns: ["club_id"]
+          },
+          {
+            foreignKeyName: "user_club_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_club_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "v_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_club_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "v_user_reading_overview"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_club_invitations_invited_user_id_fkey"
+            columns: ["invited_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_club_invitations_invited_user_id_fkey"
+            columns: ["invited_user_id"]
+            isOneToOne: false
+            referencedRelation: "v_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_club_invitations_invited_user_id_fkey"
+            columns: ["invited_user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_reading_overview"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       user_club_members: {
         Row: {
           club_id: string
@@ -3652,6 +3876,7 @@ export type Database = {
       }
       user_clubs: {
         Row: {
+          archived_at: string | null
           created_at: string
           current_book_id: string | null
           current_ends_at: string | null
@@ -3660,11 +3885,15 @@ export type Database = {
           description: string | null
           id: string
           is_private: boolean
+          kind: string
           name: string
-          owner_id: string
+          official_book_id: string | null
+          owner_id: string | null
           slug: string
+          version: number
         }
         Insert: {
+          archived_at?: string | null
           created_at?: string
           current_book_id?: string | null
           current_ends_at?: string | null
@@ -3673,11 +3902,15 @@ export type Database = {
           description?: string | null
           id?: string
           is_private?: boolean
+          kind?: string
           name: string
-          owner_id: string
+          official_book_id?: string | null
+          owner_id?: string | null
           slug: string
+          version?: number
         }
         Update: {
+          archived_at?: string | null
           created_at?: string
           current_book_id?: string | null
           current_ends_at?: string | null
@@ -3686,9 +3919,12 @@ export type Database = {
           description?: string | null
           id?: string
           is_private?: boolean
+          kind?: string
           name?: string
-          owner_id?: string
+          official_book_id?: string | null
+          owner_id?: string | null
           slug?: string
+          version?: number
         }
         Relationships: [
           {
@@ -3703,6 +3939,13 @@ export type Database = {
             columns: ["current_season_id"]
             isOneToOne: false
             referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_clubs_official_book_id_fkey"
+            columns: ["official_book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
             referencedColumns: ["id"]
           },
           {
@@ -3725,6 +3968,397 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_user_reading_overview"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      club_channels: {
+        Row: {
+          archived_at: string | null
+          chapter_id: string | null
+          club_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          name: string
+          rules_version: number
+          slug: string
+          spoiler_policy: string
+        }
+        Insert: {
+          archived_at?: string | null
+          chapter_id?: string | null
+          club_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind: string
+          name: string
+          rules_version?: number
+          slug: string
+          spoiler_policy: string
+        }
+        Update: {
+          archived_at?: string | null
+          chapter_id?: string | null
+          club_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          name?: string
+          rules_version?: number
+          slug?: string
+          spoiler_policy?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_channels_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_channels_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "user_clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_channel_consents: {
+        Row: {
+          accepted_at: string
+          channel_id: string
+          rules_version: number
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          channel_id: string
+          rules_version: number
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string
+          channel_id?: string
+          rules_version?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_channel_consents_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "club_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_channel_consents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_messages: {
+        Row: {
+          author_id: string | null
+          channel_id: string
+          client_message_id: string
+          content: string
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          id: string
+          reply_to_id: string | null
+          version: number
+          video_sec: number | null
+        }
+        Insert: {
+          author_id?: string | null
+          channel_id: string
+          client_message_id: string
+          content: string
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          id?: string
+          reply_to_id?: string | null
+          version?: number
+          video_sec?: number | null
+        }
+        Update: {
+          author_id?: string | null
+          channel_id?: string
+          client_message_id?: string
+          content?: string
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          id?: string
+          reply_to_id?: string | null
+          version?: number
+          video_sec?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_messages_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_messages_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "club_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_channel_preferences: {
+        Row: {
+          channel_id: string
+          last_seen_at: string | null
+          mode: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel_id: string
+          last_seen_at?: string | null
+          mode?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel_id?: string
+          last_seen_at?: string | null
+          mode?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_channel_preferences_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "club_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_channel_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_member_sanctions: {
+        Row: {
+          applied_by: string | null
+          club_id: string
+          created_at: string
+          expires_at: string | null
+          kind: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          applied_by?: string | null
+          club_id: string
+          created_at?: string
+          expires_at?: string | null
+          kind: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          applied_by?: string | null
+          club_id?: string
+          created_at?: string
+          expires_at?: string | null
+          kind?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_member_sanctions_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "user_clubs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_member_sanctions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_user_blocks: {
+        Row: {
+          blocked_user_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          blocked_user_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          blocked_user_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_user_blocks_blocked_user_id_fkey"
+            columns: ["blocked_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_user_blocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_channel_prompts: {
+        Row: {
+          body: string
+          channel_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          position: number
+          published_at: string
+        }
+        Insert: {
+          body: string
+          channel_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          position?: number
+          published_at?: string
+        }
+        Update: {
+          body?: string
+          channel_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          position?: number
+          published_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_channel_prompts_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "club_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_book_readings: {
+        Row: {
+          book_id: string
+          completed_at: string | null
+          first_completed_at: string | null
+          first_started_at: string | null
+          source: string
+          status: Database["public"]["Enums"]["shelf_status"]
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          book_id: string
+          completed_at?: string | null
+          first_completed_at?: string | null
+          first_started_at?: string | null
+          source?: string
+          status: Database["public"]["Enums"]["shelf_status"]
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          book_id?: string
+          completed_at?: string | null
+          first_completed_at?: string | null
+          first_started_at?: string | null
+          source?: string
+          status?: Database["public"]["Enums"]["shelf_status"]
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_book_readings_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_book_readings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_notification_preferences: {
+        Row: {
+          channel_activity: boolean
+          meeting_reminders: boolean
+          mentions: boolean
+          replies: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel_activity?: boolean
+          meeting_reminders?: boolean
+          mentions?: boolean
+          replies?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel_activity?: boolean
+          meeting_reminders?: boolean
+          mentions?: boolean
+          replies?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -4365,8 +4999,11 @@ export type Database = {
           chapter_id: string
           content: string
           created_at: string
+          deleted_at: string | null
           id: string
+          is_spoiler: boolean
           likes_count: number
+          min_percent: number
           user_id: string
           video_sec: number
         }
@@ -4374,8 +5011,11 @@ export type Database = {
           chapter_id: string
           content: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
+          is_spoiler?: boolean
           likes_count?: number
+          min_percent?: number
           user_id: string
           video_sec: number
         }
@@ -4383,8 +5023,11 @@ export type Database = {
           chapter_id?: string
           content?: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
+          is_spoiler?: boolean
           likes_count?: number
+          min_percent?: number
           user_id?: string
           video_sec?: number
         }
@@ -4477,6 +5120,19 @@ export type Database = {
       }
     }
     Views: {
+      mv_book_community_stats: {
+        Row: {
+          avg_rating: number | null
+          avg_spice_level: number | null
+          book_id: string | null
+          mood_percent: Json | null
+          pace_percent: Json | null
+          plot_vs_character_avg: number | null
+          ratings_count: number | null
+          sample_size: number | null
+        }
+        Relationships: []
+      }
       v_book_community_stats: {
         Row: {
           avg_rating: number | null
@@ -4777,8 +5433,35 @@ export type Database = {
           },
         ]
       }
+      v_book_reading_stats: {
+        Row: {
+          active_readers: number | null
+          book_id: string | null
+          completed_readers: number | null
+          completed_readers_30d: number | null
+          new_readers_30d: number | null
+          rank_position: number | null
+          started_readers: number | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_book_readings_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      add_to_up_next_atomic: {
+        Args: {
+          p_book: string
+        }
+        Returns: number
+      }
       apply_stripe_subscription_event: {
         Args: {
           p_cancel_at_period_end: boolean
@@ -4822,9 +5505,33 @@ export type Database = {
         Args: { p_chapter: string; p_user: string }
         Returns: boolean
       }
+      create_editorial_book: {
+        Args: {
+          p_author: string
+          p_cover?: string | null
+          p_pages?: number | null
+          p_slug: string
+          p_synopsis?: string | null
+          p_title: string
+        }
+        Returns: string
+      }
+      create_user_club: {
+        Args: {
+          p_description: string
+          p_name: string
+          p_private: boolean
+          p_request_id: string
+        }
+        Returns: string
+      }
       deliver_meeting_reminder: {
         Args: { p_meeting: string; p_user: string; p_window?: string }
         Returns: boolean
+      }
+      evaluate_user_achievements: {
+        Args: { p_user: string }
+        Returns: undefined
       }
       finish_newsletter_dispatch: {
         Args: { p_audience_key: string; p_issue: string; p_success: boolean }
@@ -4842,6 +5549,35 @@ export type Database = {
       generate_milestones_for_season: {
         Args: { p_season: string }
         Returns: undefined
+      }
+      get_chapter_access: {
+        Args: { p_chapter: string }
+        Returns: {
+          can_open: boolean
+          chapter_id: string
+          chapter_number: number
+          chapter_title: string
+          requires_quiz: boolean
+          season_id: string
+          season_slug: string
+          season_title: string
+        }[]
+      }
+      get_own_chapter_comment_for_edit: {
+        Args: { p_chapter_id: string; p_comment_id: string }
+        Returns: string
+      }
+      get_visible_video_timed_comments: {
+        Args: { p_chapter: string; p_limit?: number }
+        Returns: {
+          chapter_id: string
+          content: string | null
+          created_at: string
+          id: string
+          is_locked: boolean
+          is_spoiler: boolean
+          video_sec: number
+        }[]
       }
       get_my_profile_private: {
         Args: never
@@ -4872,7 +5608,27 @@ export type Database = {
           shared_moods: Database["public"]["Enums"]["mood_kind"][]
         }[]
       }
+      get_user_milestone_status: {
+        Args: { p_season_id: string; p_user: string }
+        Returns: { completed: boolean; milestone_id: string }[]
+      }
+      get_season_chapter_access: {
+        Args: { p_season: string }
+        Returns: {
+          can_open: boolean
+          chapter_id: string
+          chapter_number: number
+          chapter_title: string
+          published_at: string
+          reading_range: string
+          requires_quiz: boolean
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
+      is_book_complete: { Args: { p_book_id: string; p_user: string }; Returns: boolean }
+      remove_own_chapter_comment: { Args: { p_chapter_id: string; p_comment_id: string }; Returns: boolean }
+      join_user_club: { Args: { p_club: string }; Returns: boolean }
+      leave_user_club: { Args: { p_club: string }; Returns: boolean }
       link_stripe_customer: {
         Args: { p_customer_id: string; p_user: string }
         Returns: undefined
@@ -4921,6 +5677,10 @@ export type Database = {
         }[]
       }
       refresh_book_mood_stats: { Args: { p_book: string }; Returns: undefined }
+      reorder_reading_list: {
+        Args: { p_item_ids: string[]; p_list: string; p_version: number }
+        Returns: number
+      }
       set_my_lgpd_consent: { Args: { p_consent: boolean }; Returns: undefined }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
@@ -4934,6 +5694,300 @@ export type Database = {
         Returns: boolean
       }
       unaccent: { Args: { "": string }; Returns: string }
+      add_book_to_reading_list: {
+        Args: { p_book_id: string; p_list_id: string }
+        Returns: { ok: boolean; message: string }
+      }
+      remove_reading_list_item: {
+        Args: { p_item_id: string; p_list_id: string }
+        Returns: boolean
+      }
+      restore_reading_list_item: {
+        Args: { p_item_id: string; p_list_id: string }
+        Returns: boolean
+      }
+      invite_user_to_club: {
+        Args: { p_club: string; p_expires_at: string; p_invited_user: string }
+        Returns: string
+      }
+      revoke_club_invitation: {
+        Args: { p_invitation: string }
+        Returns: boolean
+      }
+      accept_club_invitation: {
+        Args: { p_invitation: string }
+        Returns: boolean
+      }
+      remove_club_member: {
+        Args: { p_club: string; p_member: string }
+        Returns: boolean
+      }
+      report_content: {
+        Args: { p_content_id: string; p_content_type: string; p_reason: string }
+        Returns: string
+      }
+      review_content_report: {
+        Args: { p_report: string; p_status: string }
+        Returns: boolean
+      }
+      hide_reported_content: {
+        Args: { p_report: string }
+        Returns: boolean
+      }
+      confirm_meeting_attendance: {
+        Args: { p_meeting: string; p_proof_type: string; p_user: string }
+        Returns: boolean
+      }
+      update_user_club: {
+        Args: {
+          p_club: string
+          p_description: string | null
+          p_name: string
+          p_private: boolean
+          p_version: number
+          p_season_id?: string | null
+        }
+        Returns: number
+      }
+      ensure_official_book_group: {
+        Args: { p_book: string }
+        Returns: { club_id: string; club_slug: string }[]
+      }
+      ensure_chapter_discussion: {
+        Args: { p_chapter: string }
+        Returns: {
+          channel_id: string
+          channel_slug: string
+          club_id: string
+          club_slug: string
+        }[]
+      }
+      get_club_channel_directory: {
+        Args: { p_club: string }
+        Returns: {
+          access_reason: string
+          can_read: boolean
+          chapter_id: string | null
+          chapter_number: number | null
+          display_name: string
+          has_consent: boolean
+          id: string
+          kind: string
+          rules_version: number
+          season_number: number | null
+          slug: string
+          spoiler_policy: string
+        }[]
+      }
+      create_club_topic_channel: {
+        Args: {
+          p_club: string
+          p_name: string
+          p_request_id: string
+          p_slug: string
+          p_spoiler_policy: string
+        }
+        Returns: string
+      }
+      accept_channel_spoilers: {
+        Args: { p_channel: string; p_rules_version: number }
+        Returns: boolean
+      }
+      revoke_channel_spoilers: {
+        Args: { p_channel: string }
+        Returns: boolean
+      }
+      set_channel_preference: {
+        Args: { p_channel: string; p_mode: string }
+        Returns: boolean
+      }
+      block_community_user: {
+        Args: { p_target_user: string }
+        Returns: boolean
+      }
+      unblock_community_user: {
+        Args: { p_target_user: string }
+        Returns: boolean
+      }
+      apply_club_sanction: {
+        Args: {
+          p_club: string
+          p_expires_at?: string | null
+          p_kind: string
+          p_reason: string
+          p_user: string
+        }
+        Returns: boolean
+      }
+      set_club_member_role: {
+        Args: { p_club: string; p_member: string; p_role: string }
+        Returns: boolean
+      }
+      list_club_messages: {
+        Args: {
+          p_before_created_at?: string | null
+          p_before_id?: string | null
+          p_channel: string
+          p_limit?: number
+        }
+        Returns: {
+          author_id: string | null
+          channel_id: string
+          content: string
+          created_at: string
+          edited_at: string | null
+          id: string
+          reply_to_id: string | null
+          version: number
+          video_sec: number | null
+        }[]
+      }
+      get_club_message_context: {
+        Args: { p_message: string; p_window?: number }
+        Returns: {
+          author_id: string | null
+          channel_id: string
+          content: string
+          created_at: string
+          edited_at: string | null
+          id: string
+          reply_to_id: string | null
+          version: number
+          video_sec: number | null
+        }[]
+      }
+      send_club_message: {
+        Args: {
+          p_channel: string
+          p_client_message_id: string
+          p_content: string
+          p_reply_to?: string | null
+          p_video_sec?: number | null
+        }
+        Returns: {
+          author_id: string | null
+          channel_id: string
+          channel_slug: string
+          club_slug: string
+          content: string
+          created_at: string
+          id: string
+          reply_to_id: string | null
+          version: number
+          video_sec: number | null
+        }[]
+      }
+      edit_club_message: {
+        Args: { p_content: string; p_message: string; p_version: number }
+        Returns: number
+      }
+      delete_club_message: {
+        Args: { p_message: string; p_version: number }
+        Returns: boolean
+      }
+      create_channel_editorial_prompt: {
+        Args: { p_body: string; p_channel: string; p_position?: number }
+        Returns: string
+      }
+      set_my_book_reading: {
+        Args: {
+          p_book: string
+          p_request_id: string
+          p_status: string
+          p_version: number
+        }
+        Returns: {
+          book_id: string
+          completed_at: string | null
+          first_completed_at: string | null
+          first_started_at: string | null
+          source: string
+          status: Database["public"]["Enums"]["shelf_status"]
+          updated_at: string
+          version: number
+        }[]
+      }
+      refresh_book_reading_stats: { Args: never; Returns: undefined }
+      create_club_meeting: {
+        Args: {
+          p_agenda?: string | null
+          p_book: string
+          p_chapter?: string | null
+          p_club: string
+          p_duration_min?: number
+          p_kind?: Database["public"]["Enums"]["meeting_kind"]
+          p_location?: string | null
+          p_meeting_url?: string | null
+          p_request_id?: string
+          p_scheduled_at: string
+          p_spoiler_policy?: string
+          p_title: string
+        }
+        Returns: string
+      }
+      update_club_meeting: {
+        Args: {
+          p_agenda?: string | null
+          p_chapter?: string | null
+          p_duration_min?: number
+          p_kind?: Database["public"]["Enums"]["meeting_kind"]
+          p_location?: string | null
+          p_meeting: string
+          p_meeting_url?: string | null
+          p_scheduled_at: string
+          p_spoiler_policy?: string
+          p_title: string
+          p_version: number
+        }
+        Returns: number
+      }
+      cancel_club_meeting: {
+        Args: { p_meeting: string; p_version: number }
+        Returns: number
+      }
+      set_my_notification_preferences: {
+        Args: {
+          p_channel_activity?: boolean
+          p_meeting_reminders: boolean
+          p_mentions: boolean
+          p_replies: boolean
+        }
+        Returns: boolean
+      }
+      mark_my_notifications_read: {
+        Args: { p_before?: string | null; p_ids?: string[] | null }
+        Returns: number
+      }
+      process_community_notification_outbox: {
+        Args: { p_batch_size?: number }
+        Returns: number
+      }
+      moderate_content_report: {
+        Args: {
+          p_action: string
+          p_note?: string | null
+          p_report: string
+          p_sanction_expires_at?: string | null
+        }
+        Returns: boolean
+      }
+      get_moderation_queue: {
+        Args: { p_club?: string | null; p_limit?: number }
+        Returns: {
+          channel_slug: string | null
+          club_id: string | null
+          club_slug: string | null
+          content_author_id: string | null
+          content_excerpt: string | null
+          content_id: string
+          content_type: string
+          created_at: string
+          id: string
+          reason: string
+          reporter_id: string
+          status: string
+        }[]
+      }
     }
     Enums: {
       activity_kind:
@@ -5011,6 +6065,10 @@ export type Database = {
         | "mention"
         | "badge_unlocked"
         | "poll_open"
+        | "channel_activity"
+        | "meeting_updated"
+        | "meeting_cancelled"
+        | "club_invitation"
       pace_kind: "slow" | "medium" | "fast"
       payment_provider: "stripe" | "mercado_pago" | "pagseguro" | "manual"
       poll_status: "open" | "closed"
@@ -5043,6 +6101,7 @@ export type Database = {
         | "quiz_answer"
         | "finish_book"
         | "streak_bonus"
+        | "achievement"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5251,6 +6310,10 @@ export const Constants = {
         "mention",
         "badge_unlocked",
         "poll_open",
+        "channel_activity",
+        "meeting_updated",
+        "meeting_cancelled",
+        "club_invitation",
       ],
       pace_kind: ["slow", "medium", "fast"],
       payment_provider: ["stripe", "mercado_pago", "pagseguro", "manual"],
@@ -5286,6 +6349,7 @@ export const Constants = {
         "quiz_answer",
         "finish_book",
         "streak_bonus",
+        "achievement",
       ],
     },
   },

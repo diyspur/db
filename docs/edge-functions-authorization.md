@@ -17,6 +17,7 @@
 | `social-render-card` | JWT; se `user_id` veio no body, precisa casar com `sub`; kind/payload aceitos, texto limitado/escapado, Storage path com owner. | No máximo 10 jobs/dia por usuário; output SVG sanitizado e tamanho limitado. | JWT ligado (padrão). |
 | `quiz-validate` | JWT; deriva usuário de `sub`, valida capítulo publicado, payload/answers e chave idempotente; não confia em user_id do cliente. Array vazio/parcial é normalizado para respostas `chosen_idx=-1`; score e gabarito continuam server-side. | Rate limit atômico por user/chapter; uma tentativa por request id; XP só pela RPC protegida. | JWT ligado (padrão). |
 | `generate-book-embeddings` | JWT mais papel `admin`; service-role restrito ao handler; processa só livros sem embedding. | Page size 1–20; output de dimensão 1536; atualiza condicionalmente só embeddings ainda nulos. | JWT ligado (padrão). |
+| `community-notification-worker` | Secret de serviço ou cron token (`x-scheduled-reminders-secret` ou service-role Bearer); drena itens pendentes da outbox com `FOR UPDATE SKIP LOCKED`. | Máximo 50 itens por execução; transações idempotentes e tratamento de retentativas com backoff. | **`verify_jwt=false` intencional**: chamado por cron/scheduler interno de infraestrutura. |
 
 ## Helper e privilégios compartilhados
 

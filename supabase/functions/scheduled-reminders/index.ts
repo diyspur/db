@@ -75,11 +75,19 @@ Deno.serve(async (req) => {
         if (page.length < rsvpPageSize) break;
       }
     }
+
+    const { data: outboxProcessed } = await service.rpc(
+      "process_community_notification_outbox",
+      { p_batch_size: 100 },
+    );
+    await service.rpc("refresh_book_reading_stats");
+
     return json({
       ok: true,
       created,
       skipped,
       meetings: meetings.length,
+      outbox_processed: typeof outboxProcessed === "number" ? outboxProcessed : 0,
     });
   } catch (error) {
     await captureFunctionException(error, "scheduled-reminders", requestId);

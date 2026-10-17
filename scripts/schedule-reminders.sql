@@ -51,5 +51,35 @@ BEGIN
       $job$
     );
   END IF;
+
+  SELECT jobid
+    INTO v_job_id
+    FROM cron.job
+   WHERE jobname = 'community-notifications-every-minute';
+
+  IF v_job_id IS NULL THEN
+    PERFORM cron.schedule(
+      'community-notifications-every-minute',
+      '* * * * *',
+      $job$
+        SELECT public.process_community_notification_outbox(100);
+      $job$
+    );
+  END IF;
+
+  SELECT jobid
+    INTO v_job_id
+    FROM cron.job
+   WHERE jobname = 'refresh-book-reading-stats-15m';
+
+  IF v_job_id IS NULL THEN
+    PERFORM cron.schedule(
+      'refresh-book-reading-stats-15m',
+      '*/15 * * * *',
+      $job$
+        SELECT public.refresh_book_reading_stats();
+      $job$
+    );
+  END IF;
 END
 $$;

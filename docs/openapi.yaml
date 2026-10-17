@@ -3,12 +3,12 @@ info:
   title: API backend DIY Spur
   version: 1.0.0
   description: |
-    Contrato HTTP dos dez Edge Functions do backend. As operações que usam
+    Contrato HTTP dos onze Edge Functions do backend. As operações que usam
     `BearerAuth` aceitam somente um token Bearer validado pelo Supabase; o
     usuário retornado por `auth.getUser` é a identidade efetiva da operação.
     A operação de newsletter exige ainda que esse usuário tenha `role=admin`
-    no perfil. As funções agendadas e o webhook Stripe usam seus próprios
-    segredos e não aceitam Bearer como substituto.
+    no perfil. As funções agendadas, o worker de notificações e o webhook Stripe
+    usam seus próprios segredos e não aceitam Bearer como substituto.
 servers:
   - url: https://{project-ref}.supabase.co/functions/v1
     description: Base das Edge Functions do Supabase
@@ -313,6 +313,63 @@ paths:
               example: {error: method_not_allowed}
         '503':
           description: Falha ao consultar reuniões/RSVP ou ao entregar lembretes.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Error'}
+              example: {error: temporarily_unavailable}
+
+  /community-notification-worker:
+    post:
+      tags: [Agendamento]
+      operationId: communityNotificationWorker
+      summary: Processa a outbox de notificações comunitárias e atualiza snapshots de leitura
+      description: |
+        Drena eventos pendentes em `private.community_notification_outbox`
+        com `FOR UPDATE SKIP LOCKED`, revalidando associação, bloqueios,
+        consentimento e preferências no momento da entrega. Opcionalmente
+        atualiza `private.mv_book_reading_stats`. Autenticado por segredo
+        em tempo constante (`x-community-notifications-secret` ou
+        `x-scheduled-reminders-secret`).
+      security:
+        - ScheduledRemindersSecret: []
+      parameters:
+        - $ref: '#/components/parameters/ScheduledRemindersSecret'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                batch_size:
+                  type: integer
+                  minimum: 1
+                  maximum: 200
+                  default: 50
+                refresh_stats:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Outbox processada com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityNotificationWorkerResponse'
+        '401':
+          description: Segredo ausente ou inválido.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Error'}
+              example: {error: unauthorized}
+        '405':
+          description: Método HTTP diferente de POST.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Error'}
+              example: {error: method_not_allowed}
+        '503':
+          description: Falha temporária ao processar a fila de notificações.
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Error'}
@@ -909,6 +966,18 @@ components:
           type: integer
           minimum: 0
           description: Número de reuniões scheduled na janela de 48 horas.
+        outbox_processed:
+          type: integer
+          minimum: 0
+          description: Eventos comunitários drenados da outbox durante o ciclo.
+      additionalProperties: false
+    CommunityNotificationWorkerResponse:
+      type: object
+      required: [ok, processed, refreshed_stats]
+      properties:
+        ok: {type: boolean, const: true}
+        processed: {type: integer, minimum: 0}
+        refreshed_stats: {type: boolean}
       additionalProperties: false
     AiUserEmbeddingsRequest:
       type: object

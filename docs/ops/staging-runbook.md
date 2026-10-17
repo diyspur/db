@@ -75,3 +75,21 @@ Ao validar novas migrations em staging:
    - `anon` não consegue ler PII de perfis nem corpos de comentários bloqueados;
    - `user_a` não pode editar notas de diário ou listas de `user_b`;
    - Leitores comuns não podem promover seus próprios papéis ou publicar capítulos.
+
+---
+
+## 4. Comunidade de Leitura Integrada, Outbox e Snapshots (M01–M12)
+
+1. **Verificação em PGlite (`community-discussions.mjs`)**:
+   - Garante unicidade do grupo oficial por livro (`user_clubs_one_official_per_book`), preservação quando o fundador exclui a conta, canais permanentes (`sem-spoilers`, `com-spoilers`, capítulos e tópicos), consentimento versionado de spoilers, estado canônico `user_book_readings`, encontros por livro/clube com `chapter_id` opcional, outbox sem spoilers e leitura idempotente de notificações (`mark_my_notifications_read`).
+2. **Jobs Operacionais (`scripts/schedule-reminders.sql`)**:
+   - `community-notifications-every-minute`: executa `SELECT public.process_community_notification_outbox(100);` a cada minuto.
+   - `refresh-book-reading-stats-15m`: executa `SELECT public.refresh_book_reading_stats();` a cada 15 minutos.
+3. **Inspeção de Saúde da Outbox**:
+   ```sql
+   SELECT event_type, count(*) AS pending, max(attempts) AS max_attempts
+   FROM private.community_notification_outbox
+   WHERE processed_at IS NULL
+   GROUP BY event_type;
+   ```
+
