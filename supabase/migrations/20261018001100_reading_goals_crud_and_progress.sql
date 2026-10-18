@@ -154,6 +154,12 @@ BEGIN
     RAISE EXCEPTION 'invalid_year' USING errcode = '22023';
   END IF;
 
+  IF (p_books IS NOT NULL AND p_books < 0)
+     OR (p_pages IS NOT NULL AND p_pages < 0)
+     OR (p_minutes IS NOT NULL AND p_minutes < 0) THEN
+    RAISE EXCEPTION 'invalid_target' USING errcode = '22023';
+  END IF;
+
   IF (p_books IS NULL OR p_books <= 0)
      AND (p_pages IS NULL OR p_pages <= 0)
      AND (p_minutes IS NULL OR p_minutes <= 0) THEN
