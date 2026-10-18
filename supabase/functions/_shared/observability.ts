@@ -41,22 +41,14 @@ export function getEnv(key: string): string | undefined {
 export function isSensitiveKey(key: string): boolean {
   if (!key || typeof key !== "string") return false;
 
-  const normalized = key
-    .toLowerCase()
+  const rawLower = key.toLowerCase().trim();
+  const normalized = rawLower
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[-_]/g, "");
 
-  // Exceção de domínio: autores de livros no clube de leitura não são credenciais
-  if (
-    normalized.includes("author") &&
-    !normalized.includes("authorize") &&
-    !normalized.includes("authorization")
-  ) {
-    return false;
-  }
-
-  return (
+  // 1. Termos sensíveis avaliados PRIMEIRO (inclusive antes de qualquer exceção de domínio)
+  const isExplicitlySensitive =
     normalized.includes("password") ||
     normalized.includes("senha") ||
     normalized.includes("secret") ||
@@ -68,12 +60,33 @@ export function isSensitiveKey(key: string): boolean {
     normalized.includes("cvv") ||
     normalized.includes("cvc") ||
     normalized.includes("cpf") ||
-    normalized === "auth" ||
-    normalized.includes("authorization") ||
     normalized.includes("cookie") ||
     normalized.includes("credential") ||
-    normalized.includes("privatekey")
-  );
+    normalized.includes("privatekey") ||
+    normalized.includes("authorization") ||
+    normalized.includes("authorize");
+
+  if (isExplicitlySensitive) {
+    return true;
+  }
+
+  // 2. Exceção de domínio estrita: apenas campos específicos e seguros de autor
+  const isSafeAuthor =
+    rawLower === "author" ||
+    rawLower === "author_id" ||
+    rawLower === "author_name" ||
+    rawLower === "book_author" ||
+    normalized === "author" ||
+    normalized === "authorid" ||
+    normalized === "authorname" ||
+    normalized === "bookauthor";
+
+  if (isSafeAuthor) {
+    return false;
+  }
+
+  // 3. Avalia auth e variantes
+  return normalized.includes("auth");
 }
 
 export function maskEmail(email: string): string {
@@ -170,8 +183,11 @@ function sanitizeInternal<T>(input: T, seen: WeakSet<object>, depth: number, max
   if (typeof input === "string") {
     return sanitizeString(input, maxLength) as unknown as T;
   }
-  if (typeof input === "number" || typeof input === "boolean" || typeof input === "bigint") {
+  if (typeof input === "number" || typeof input === "boolean") {
     return input;
+  }
+  if (typeof input === "bigint") {
+    return (input as bigint).toString() as unknown as T;
   }
   if (input instanceof Error) {
     return sanitizeError(input) as unknown as T;

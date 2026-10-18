@@ -49,10 +49,19 @@ Deno.test("isSensitiveKey identifies confidential keys and respects domain excep
   assert(isSensitiveKey("authorization"), "authorization should be sensitive");
   assert(isSensitiveKey("cookie"), "cookie should be sensitive");
 
-  // Domain exceptions: book authors
+  // Domain exceptions: book authors (safe fields only)
   assertEquals(isSensitiveKey("author"), false, "author is domain concept, not credential");
+  assertEquals(isSensitiveKey("author_id"), false, "author_id is not credential");
   assertEquals(isSensitiveKey("book_author"), false, "book_author is not credential");
   assertEquals(isSensitiveKey("author_name"), false, "author_name is not credential");
+  assertEquals(isSensitiveKey("authorId"), false, "authorId is not credential");
+  assertEquals(isSensitiveKey("authorName"), false, "authorName is not credential");
+
+  // Sensitive terms inside author-prefixed fields must be redacted
+  assert(isSensitiveKey("author_token"), "author_token contains sensitive term token");
+  assert(isSensitiveKey("author_password"), "author_password contains sensitive term password");
+  assert(isSensitiveKey("author_secret"), "author_secret contains sensitive term secret");
+  assert(isSensitiveKey("author_key"), "author_key contains sensitive term key");
 });
 
 Deno.test("maskEmail masks local part and preserves domain suffix", () => {
@@ -112,6 +121,21 @@ Deno.test("sanitizePayload redacts sensitive keys and recurses through nested ob
   const tags = meta.tags as string[];
   assertEquals(tags[0], "romance");
   assertEquals(tags[1], "Bearer [REDACTED]");
+});
+
+Deno.test("sanitizePayload converts BigInt to string without throwing on JSON.stringify", () => {
+  const payload = {
+    numeric_id: 100n,
+    total_count: 9007199254740995n,
+  };
+
+  const sanitized = sanitizePayload(payload) as Record<string, unknown>;
+  assertEquals(sanitized.numeric_id, "100");
+  assertEquals(sanitized.total_count, "9007199254740995");
+
+  // Must not throw TypeError: Do not know how to serialize a BigInt
+  const json = JSON.stringify(sanitized);
+  assert(json.includes('"numeric_id":"100"'), "BigInt was converted to string in json");
 });
 
 Deno.test("sanitizePayload handles circular structures safely", () => {
