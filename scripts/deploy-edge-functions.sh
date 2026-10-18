@@ -3,10 +3,19 @@ set -euo pipefail
 
 : "${SUPABASE_PROJECT_REF:?Set SUPABASE_PROJECT_REF before deployment}"
 
-# Requires Supabase CLI login/link. Configure provider secrets separately in Supabase.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+IMPORT_MAP="$ROOT_DIR/supabase/functions/deno.json"
+
+SUPABASE_BIN="npx supabase"
+
 # User functions keep JWT verification; service/webhook functions authenticate themselves.
-for fn in quiz-validate award-xp vote-next-book ai-recommendations ai-user-embeddings match-readers social-render-card newsletter-dispatch; do
-  supabase functions deploy "$fn" --project-ref "$SUPABASE_PROJECT_REF"
+for fn in quiz-validate award-xp vote-next-book ai-recommendations ai-user-embeddings match-readers social-render-card newsletter-dispatch generate-book-embeddings; do
+  echo "Deploying $fn..."
+  $SUPABASE_BIN functions deploy "$fn" --import-map "$IMPORT_MAP" --project-ref "$SUPABASE_PROJECT_REF"
 done
-supabase functions deploy scheduled-reminders --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
-supabase functions deploy stripe-webhook --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
+
+for fn in scheduled-reminders stripe-webhook community-notification-worker; do
+  echo "Deploying $fn (--no-verify-jwt)..."
+  $SUPABASE_BIN functions deploy "$fn" --no-verify-jwt --import-map "$IMPORT_MAP" --project-ref "$SUPABASE_PROJECT_REF"
+done
