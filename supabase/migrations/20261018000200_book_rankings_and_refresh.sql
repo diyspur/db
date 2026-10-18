@@ -22,6 +22,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS mv_book_reading_stats_v2_book_idx
 
 GRANT SELECT ON private.mv_book_reading_stats_v2 TO anon, authenticated, service_role;
 
+DROP VIEW IF EXISTS public.v_book_reading_stats CASCADE;
 CREATE OR REPLACE VIEW public.v_book_reading_stats
 WITH (security_invoker = true)
 AS

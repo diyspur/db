@@ -22,6 +22,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS book_reading_stats_book_idx
   ON private.mv_book_reading_stats(book_id);
 
 -- Filter through public.books in security_invoker view so only visible books are returned.
+DROP VIEW IF EXISTS public.v_book_reading_stats CASCADE;
 CREATE OR REPLACE VIEW public.v_book_reading_stats
 WITH (security_invoker = true)
 AS

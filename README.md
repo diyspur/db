@@ -4,6 +4,7 @@ Repositório do backend do DIYSPUR: schema PostgreSQL, migrations, RLS, views, R
 
 - **Repositório:** <https://github.com/diyspur-cloud/db>
 - **Frontend:** <https://github.com/diyspur-cloud/app>
+- **Documentação centralizada:** <https://github.com/diyspur/docs>
 - **Produção:** <https://diyspur.vercel.app/>
 - **Projeto Supabase configurado:** `xjhehhfhhoomblcggjpk`
 - **Schema funcional:** `public`, com helpers e projeções privadas quando necessário.
@@ -46,7 +47,7 @@ A árvore versionada possui **85 migrations SQL** e seeds editoriais em `supabas
 - avisos de conteúdo de Verity;
 - desafio anual de 12 livros em 12 meses.
 
-O projeto remoto utilizado pela aplicação já recebeu as migrations funcionais desta rodada. Para novas implantações, consulte o guia passo a passo em [`../docs/deploy/README.md`](../docs/deploy/README.md).
+O projeto remoto utilizado pela aplicação já recebeu as migrations funcionais desta rodada. Para novas implantações, consulte o guia passo a passo em [`../docs/db-docs/deploy/README.md`](../docs/db-docs/deploy/README.md).
 
 ## Arquitetura
 
@@ -87,14 +88,13 @@ supabase/
 ├── seed_complement.sql     # conteúdo complementar/editorial
 └── security-audit.sql      # consultas auxiliares de auditoria
 
-docs/
-├── openapi.yaml
-├── supabase-reference.md
+docs/                       # [Consolidado em diyspur/docs (../docs/db-docs)]
+├── openapi.yaml            # Contratos de APIs e Edge Functions
+├── supabase-reference.md   # Referência de schema, tabelas e views
 ├── edge-functions-authorization.md
 ├── deployment-status.md
 ├── implementation-blockers.md
-├── verity-edition-sources.md
-└── execution/              # reconciliação e evidências de execução
+└── execution/              # Reconciliação e histórico de auditorias
 
 scripts/
 ├── deploy-edge-functions.sh
@@ -187,7 +187,7 @@ Regras importantes já aplicadas no contrato atual:
 - roles de membros de clube obedecem constraints e policies de autorização;
 - função de XP e evaluator de achievements são idempotentes.
 
-Use `supabase/security-audit.sql` e as consultas documentadas em `docs/supabase-reference.md` para auditorias. Não registre JWT, senha, gabarito, payload privado ou secret em logs.
+Use `supabase/security-audit.sql` e as consultas documentadas em [`../docs/db-docs/supabase-reference.md`](../docs/db-docs/supabase-reference.md) para auditorias. Não registre JWT, senha, gabarito, payload privado ou secret em logs.
 
 ## Migrations e seeds
 
@@ -325,7 +325,7 @@ Não aplique migrations diretamente após um simples `git push`. O procedimento 
 5. revisar policies, grants, índices, triggers e views;
 6. aplicar em uma janela controlada;
 7. verificar a migration no remoto e testar Data API/RPC/Edge Function;
-8. registrar evidência em `docs/execution/`.
+8. registrar evidência em [`../docs/db-docs/execution/`](../docs/db-docs/execution/).
 
 Com Supabase CLI, o comando de aplicação deve ser executado somente após essa reconciliação:
 
@@ -397,14 +397,15 @@ Pare. Compare o SQL efetivo, o histórico remoto e o clone. Registre a correspon
 
 ## Documentação relacionada
 
-- [`SDDBD2.md`](./SDDBD2.md) — especificação original;
-- [`docs/openapi.yaml`](./docs/openapi.yaml) — contratos documentados;
-- [`docs/supabase-reference.md`](./docs/supabase-reference.md) — referência de tabelas/RPCs/views;
-- [`docs/edge-functions-authorization.md`](./docs/edge-functions-authorization.md) — autorização das funções;
-- [`docs/deployment-status.md`](./docs/deployment-status.md) — estado de publicação;
-- [`docs/implementation-blockers.md`](./docs/implementation-blockers.md) — bloqueios e dependências;
-- [`docs/verity-edition-sources.md`](./docs/verity-edition-sources.md) — fontes editoriais;
-- [`TODO.md`](./TODO.md) — pendências priorizadas.
+Toda a documentação técnica foi consolidada no repositório centralizado [`diyspur/docs`](https://github.com/diyspur/docs) (pasta `../docs/db-docs/`):
+- [`../docs/db-docs/SDDBD2.md`](../docs/db-docs/SDDBD2.md) — especificação executável do banco;
+- [`../docs/db-docs/openapi.yaml`](../docs/db-docs/openapi.yaml) — contratos documentados;
+- [`../docs/db-docs/supabase-reference.md`](../docs/db-docs/supabase-reference.md) — referência de tabelas/RPCs/views;
+- [`../docs/db-docs/edge-functions-authorization.md`](../docs/db-docs/edge-functions-authorization.md) — autorização das funções;
+- [`../docs/db-docs/deployment-status.md`](../docs/db-docs/deployment-status.md) — estado de publicação;
+- [`../docs/db-docs/implementation-blockers.md`](../docs/db-docs/implementation-blockers.md) — bloqueios e dependências;
+- [`../docs/db-docs/verity-edition-sources.md`](../docs/db-docs/verity-edition-sources.md) — fontes editoriais;
+- [`../docs/db-docs/TODO.md`](../docs/db-docs/TODO.md) — pendências priorizadas.
 
 ## Contribuição
 
