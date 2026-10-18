@@ -91,7 +91,6 @@ CREATE TABLE public.reading_goals (
   target_pages integer,
   target_minutes integer,
   created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT reading_goals_user_id_year_key UNIQUE (user_id, year)
 );
 
@@ -115,9 +114,13 @@ await db.exec(bootstrap);
 const mig5 = await readFile(resolve(repoRoot, "supabase/migrations/20261018000500_multiple_personal_reading_goals.sql"), "utf-8");
 await db.exec(mig5);
 
-// Apply our new migration
+// Apply migration introducing multiple goals RPC
 const mig11 = await readFile(resolve(repoRoot, "supabase/migrations/20261018001100_reading_goals_crud_and_progress.sql"), "utf-8");
 await db.exec(mig11);
+
+// Apply repair migration adding updated_at and fixing trigger dispatch (QA-01, QA-02)
+const mig15 = await readFile(resolve(repoRoot, "supabase/migrations/20261018001500_repair_personal_goals_contract.sql"), "utf-8");
+await db.exec(mig15);
 await db.exec("GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated, service_role;");
 
 // Seed users and books
