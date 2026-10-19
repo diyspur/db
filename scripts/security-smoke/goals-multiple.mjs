@@ -121,6 +121,10 @@ await db.exec(mig11);
 // Apply repair migration adding updated_at and fixing trigger dispatch (QA-01, QA-02)
 const mig15 = await readFile(resolve(repoRoot, "supabase/migrations/20261018001500_repair_personal_goals_contract.sql"), "utf-8");
 await db.exec(mig15);
+
+// Apply strict migration enforcing strict goals and up_next contracts (QA-19, QA-20)
+const mig17 = await readFile(resolve(repoRoot, "supabase/migrations/20261018001700_strict_up_next_and_goals.sql"), "utf-8");
+await db.exec(mig17);
 await db.exec("GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated, service_role;");
 
 // Seed users and books
@@ -138,7 +142,7 @@ await db.exec(`SET request.jwt.claim.sub = '${userA}'; SET ROLE authenticated;`)
 // Create Goal 1: 12 books
 const goal1Res = await db.query(`
   SELECT public.set_personal_reading_goal(
-    gen_random_uuid(),
+    null,
     'Desafio Anual 12 Livros',
     2026,
     12,
@@ -150,13 +154,13 @@ const goal1Res = await db.query(`
 const rawGoal1 = goal1Res.rows[0].goal;
 const goal1 = typeof rawGoal1 === 'string' ? JSON.parse(rawGoal1) : rawGoal1;
 assert.equal(goal1.year, 2026);
-assert.equal(goal1.target_books, 12);
+assert.equal(goal1.targetBooks ?? goal1.target_books, 12);
 assert.equal(goal1.version, 1);
 
 // Create Goal 2: 24 books in the same year 2026
 const goal2Res = await db.query(`
   SELECT public.set_personal_reading_goal(
-    gen_random_uuid(),
+    null,
     'Meta Ambiciosa 24 Livros',
     2026,
     24,
@@ -168,7 +172,7 @@ const goal2Res = await db.query(`
 const rawGoal2 = goal2Res.rows[0].goal;
 const goal2 = typeof rawGoal2 === 'string' ? JSON.parse(rawGoal2) : rawGoal2;
 assert.equal(goal2.year, 2026);
-assert.equal(goal2.target_books, 24);
+assert.equal(goal2.targetBooks ?? goal2.target_books, 24);
 assert.equal(goal2.version, 1);
 assert.notEqual(goal1.id, goal2.id);
 
